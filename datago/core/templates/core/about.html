@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block title %}DATAGO - Tentang Kami{% endblock %}
+
+{% block content %}
+<div class="page-container container-centered">
+    <div class="glass-card text-center">
+        <h1 class="page-headline" style="text-align: left; font-size: 3rem; color: black; font-weight: bold;">Tentang Kami</h1>
+        <p class="lead-text" style="text-align: left; color: black;">DATAGO adalah platform manajemen dataset yang dirancang untuk membantu pengguna mengelola, mengorganisir, dan menganalisis dataset secara terstruktur dalam satu sistem terintegrasi.</p>
+        
+        <br><br>
+
+        <h1 class="page-headline" style="text-align: right; font-size: 3rem; color: black; font-weight: bold;">Tujuan Kami</h1>
+        <p class="lead-text" style="text-align: left; color: black;">Platform ini dibuat untuk menyederhanakan proses pengelolaan dataset yang digunakan dalam pemodelan perangkat lunak dan analisis data.<br>
+        Dengan DATAGO, pengguna dapat membuat struktur dataset, mengunggah data, dan memantau kualitas dataset serta perubahannya secara efisien.</p>
+        
+        <a href="{% url 'home' %}" class="btn-primary">Kembali ke Beranda</a>
+    </div>
+</div>
+{% endblock %}

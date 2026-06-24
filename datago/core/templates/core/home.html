@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}DATAGO - Home{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Manage, track, and analyze your datasets in one place.</h1>
+            <p class="hero-desc">
+                This platform helps you manage, organize, and analyze datasets efficiently.
+                Upload data, track changes, and monitor dataset quality in one integrated system.
+                Join us now on DATAGO.
+            </p>
+            <a href="{% url 'datasets' %}" class="btn-explore">Explore</a>
+        </div>
+    </section>
+
+    <!-- What's New Section -->
+    <section class="news-section">
+        <h2 class="section-title">What’s New?</h2>
+        <div class="news-grid">
+            <!-- Card 1 -->
+            <a href="{% url 'create_dataset' %}" class="news-card">
+                <div class="card-content">
+                    <h3 class="card-title">Create Dataset</h3>
+                    <p class="card-text">You can now create your own dataset in DATAGO.</p>
+                </div>
+            </a>
+            
+            <!-- Card 2 -->
+            <a href="{% url 'about' %}" class="news-card">
+                <div class="card-content">
+                    <h3 class="card-title">DATAGO Tutorial</h3>
+                    <p class="card-text">Click here to see step-by-step how to use DATAGO.</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Statistics Section (Figma Dark Footer style) -->
+    <section class="stats-section">
+        <div class="stats-container">
+            
+            <!-- Chart 1: Total Dataset per Year -->
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Total Dataset per Year</h3>
+                
+                <div class="chart-relative-container">
+                    <div class="donut-chart-container" id="chart-datasets" data-stats='{{ total_datasets_per_year|json_script:"datasets-data"|safe }}'>
+                        <!-- SVG Ring -->
+                        <svg class="donut-svg" viewBox="0 0 160 160">
+                            <!-- Background circle (inner dark purple space) -->
+                            <circle class="donut-hole" cx="80" cy="80" r="60" fill="#1F003C"></circle>
+                            <!-- Empty background track -->
+                            <circle class="donut-ring" cx="80" cy="80" r="60" fill="transparent" stroke="#2a0054" stroke-width="16"></circle>
+                            
+                            <!-- Interactive Segments drawn by JS -->
+                            <g class="segments-group"></g>
+                        </svg>
+                    </div>
+
+                    <!-- Absolute Tooltip Pills dynamically rendered -->
+                    {% for item in total_datasets_per_year %}
+                    <div class="chart-pill pill-{{ item.year }}" style="{{ item.position }}">
+                        <span class="pill-year">{{ item.year }}</span>
+                        <span class="pill-value">{{ item.percentage_display }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Chart 2: Total Dataset Downloaded per Year -->
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Total Dataset Downloaded per Year</h3>
+                
+                <div class="chart-relative-container">
+                    <div class="donut-chart-container" id="chart-downloads" data-stats='{{ total_downloads_per_year|json_script:"downloads-data"|safe }}'>
+                        <svg class="donut-svg" viewBox="0 0 160 160">
+                            <circle class="donut-hole" cx="80" cy="80" r="60" fill="#1F003C"></circle>
+                            <circle class="donut-ring" cx="80" cy="80" r="60" fill="transparent" stroke="#2a0054" stroke-width="16"></circle>
+                            
+                            <g class="segments-group"></g>
+                        </svg>
+                    </div>
+
+                    <!-- Absolute Tooltip Pills dynamically rendered -->
+                    {% for item in total_downloads_per_year %}
+                    <div class="chart-pill pill-{{ item.year }}" style="{{ item.position }}">
+                        <span class="pill-year">{{ item.year }}</span>
+                        <span class="pill-value">{{ item.percentage_display }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<!-- JSON Script blocks for Django template data transfer -->
+{{ total_datasets_per_year|json_script:"datasets-raw" }}
+{{ total_downloads_per_year|json_script:"downloads-raw" }}
+{% endblock %}

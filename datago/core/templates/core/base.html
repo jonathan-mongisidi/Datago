@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DATAGO - Manage & Analyze Dataset{% endblock %}</title>
+    <!-- Modern Typography from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .global-flash-wrap {
+            max-width: 1200px;
+            margin: 20px auto 0;
+            padding: 0 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .global-flash {
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .global-flash-success {
+            background-color: #E6F9EE;
+            color: #1a7a3f;
+            border-color: #b3e6c8;
+        }
+        .global-flash-error {
+            background-color: #FEECEC;
+            color: #c0392b;
+            border-color: #f5c6c6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Navigation matching Figma design -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="{% url 'home' %}" class="logo">DATAGO</a>
+
+            <nav class="nav-links">
+                <a href="{% url 'about' %}"
+                    class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">Tentang Kami</a>
+                <a href="{% url 'datasets' %}"
+                    class="{% if request.resolver_match.url_name == 'datasets' %}active{% endif %}">Dataset</a>
+                <a href="{% url 'create_dataset' %}"
+                    class="{% if request.resolver_match.url_name == 'create_dataset' %}active{% endif %}">Create
+                    Dataset</a>
+                <a href="{% url 'dataset_requests' %}"
+                    class="{% if request.resolver_match.url_name == 'dataset_requests' %}active{% endif %}">Permintaan Dataset</a>
+
+            </nav>
+
+            <div class="header-actions">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         style="cursor:pointer" id="search-submit-icon">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="global-search-input" placeholder="Cari dataset..."
+                           autocomplete="off">
+                </div>
+
+                {% if user.is_authenticated %}
+                <!-- ── Profil Unit (Logged In) ── -->
+                <div class="profile-wrapper" id="profileWrapper">
+                    <!-- Avatar circle: klik untuk membuka dropdown -->
+                    <div class="avatar-circle" style="background-color: {{ avatar_color }};" title="Menu profil">
+                        {% if profile_picture %}
+                            <img src="{{ profile_picture.url }}" alt="Profil" class="cp-avatar-img">
+                        {% else %}
+                            <svg class="avatar-icon" viewBox="0 0 24 24" fill="white"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"/>
+                                <path d="M12 14C7.03 14 3 16.69 3 20V22H21V20C21 16.69 16.97 14 12 14Z"/>
+                            </svg>
+                        {% endif %}
+                    </div>
+                    <span class="profile-name">{{ user.first_name|default:user.username }}</span>
+                    <!-- Chevron icon -->
+                    <svg class="profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+
+                    <!-- Dropdown Menu -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="{% url 'change_profile' %}" class="dropdown-item">
+                            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            Change Profil Picture
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item dropdown-item--danger">
+                            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            Log Out
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <!-- ── Masuk / Sign Up Button (Guest) ── -->
+                <a href="{% url 'signin' %}" class="btn-signin">Masuk / Sign Up</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="mobile-toggle" aria-label="Toggle Menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% block messages %}
+            {% if messages %}
+            <div class="global-flash-wrap" id="global-flash-wrap">
+                {% for message in messages %}
+                <div class="global-flash {% if message.tags == 'error' %}global-flash-error{% else %}global-flash-success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            <script>
+                setTimeout(() => {
+                    const flashWrap = document.getElementById('global-flash-wrap');
+                    if (flashWrap) {
+                        flashWrap.style.transition = 'opacity 0.5s ease-out';
+                        flashWrap.style.opacity = '0';
+                        setTimeout(() => flashWrap.remove(), 500);
+                    }
+                }, 4000);
+            </script>
+            {% endif %}
+        {% endblock %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- JavaScript Actions -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

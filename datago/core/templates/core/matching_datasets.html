@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dataset yang Cocok - DATAGO{% endblock %}
+
+{% block content %}
+<div class="datasets-page" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+    <div style="margin-bottom: 24px;">
+        <a href="{% url 'dataset_requests' %}" style="text-decoration: none; color: #7B00FF; font-weight: 600; font-size: 14px;">&larr; Kembali ke Dataset Permintaans</a>
+    </div>
+
+    <h1 style="font-size: 32px; color: #1a1a2e; margin-bottom: 8px;">Dataset yang Cocok</h1>
+    <p style="color: #666; margin-bottom: 30px; font-size: 16px;">Berikut adalah daftar file CSV yang sesuai dengan kriteria yang diminta oleh Intelligence Creation.</p>
+
+    <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px;">
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1a1a2e;">Kriteria Pencarian:</h3>
+        <ul style="list-style: none; padding: 0; margin: 0; color: #555; font-size: 14px;">
+            <li style="margin-bottom: 6px;"><strong>Permintaan:</strong> {{ req.title }}</li>
+            {% if req.min_rows %}
+            <li style="margin-bottom: 6px;"><strong>Minimal Baris:</strong> {{ req.min_rows }} baris</li>
+            {% endif %}
+            {% if req.required_columns %}
+            <li style="margin-bottom: 6px;"><strong>Kolom Wajib:</strong> {{ req.required_columns }}</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background-color: #f8f9fa; border-bottom: 1px solid #eee;">
+                <tr>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Dataset Asal</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Nama File</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Versi</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444; text-align: right;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dfile in matching_files %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 20px;">
+                        <a href="{% url 'dataset_detail' dfile.dataset.pk %}" style="font-weight: 600; color: #7B00FF; text-decoration: none;">{{ dfile.dataset.title }}</a>
+                        <div style="font-size: 12px; color: #888; margin-top: 4px;">Pemilik: {{ dfile.dataset.owner.username }}</div>
+                    </td>
+                    <td style="padding: 20px; color: #444; font-size: 14px;">
+                        {{ dfile.filename }}
+                    </td>
+                    <td style="padding: 20px;">
+                        <span style="background: #f1f3f5; color: #555; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">{{ dfile.version_tag }}</span>
+                    </td>
+                    <td style="padding: 20px; text-align: right;">
+                        <a href="{{ dfile.file.url }}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #e6f9ee; color: #1a7a3f; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500;">Download File</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 40px; text-align: center; color: #888;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 16px; color: #ccc;">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <p style="font-size: 16px;">Tidak ada dataset yang memenuhi kriteria tersebut.</p>
+                        <p style="font-size: 13px; margin-top: 8px;">Coba buat dataset baru atau gunakan file lain.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,412 @@
+{% extends 'core/base.html' %}
+
+{% block title %}DATAGO - Buat Dataset{% endblock %}
+
+{% block content %}
+
+{% if show_login_warning %}
+<!-- ── Login Warning Modal ── -->
+<div class="lw-backdrop" id="lw-backdrop">
+    <div class="lw-modal animate-fade-in">
+        <!-- Icon -->
+        <div class="lw-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" class="lw-icon">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+        </div>
+
+        <h2 class="lw-title">Kamu Belum Login</h2>
+        <p class="lw-desc">
+            Untuk membuat dataset, kamu harus login terlebih dahulu.
+            Silakan masuk ke akunmu atau daftar jika belum punya akun.
+        </p>
+
+        <div class="lw-actions">
+            <a href="{% url 'signin' %}" class="btn-primary lw-btn">Sign In</a>
+            <a href="{% url 'signup' %}" class="btn-secondary lw-btn">Daftar Akun</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Login Warning Modal ── */
+.lw-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 0, 30, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.lw-modal {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 48px 40px 40px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+        0 32px 80px rgba(148, 0, 255, 0.22),
+        0 8px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.lw-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #4B0082);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(148, 0, 255, 0.35);
+}
+
+.lw-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.lw-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.lw-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.lw-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.lw-btn {
+    flex: 1;
+    text-align: center;
+    padding: 13px 20px;
+}
+</style>
+{% endif %}
+
+<div class="page-container container-centered">
+    <div class="glass-card form-container">
+
+        <!-- ── Step Indicator ── -->
+        <div class="stepper">
+            <div class="step-item {% if not show_step2 %}active{% else %}done{% endif %}" id="step-indicator-1">
+                <div class="step-circle" id="step-circle-1">
+                    {% if show_step2 %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             style="width:18px;height:18px">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    {% else %}1{% endif %}
+                </div>
+                <span class="step-label">Input Deskripsi</span>
+            </div>
+            <div class="step-connector {% if show_step2 %}done{% endif %}"></div>
+            <div class="step-item {% if show_step2 %}active{% endif %}" id="step-indicator-2">
+                <div class="step-circle">2</div>
+                <span class="step-label">Upload Dataset</span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════
+             STEP 1 – Input Deskripsi
+        ══════════════════════════════════ -->
+        {% if not show_step2 %}
+        <div id="step-1">
+            <h1 class="page-headline">Create New Dataset</h1>
+            <p class="form-subtext">Initialize an empty tracking dataset container. You can add files and versions later.</p>
+
+            <form class="custom-form" method="POST" action="{% url 'create_dataset' %}">
+                {% csrf_token %}
+                <input type="hidden" name="wizard_step" value="1">
+
+                <div class="form-group">
+                    <label for="dataset-title">Dataset Judul</label>
+                    <input type="text" id="dataset-title" name="dataset_title"
+                           placeholder="e.g. Traffic Sensors Hourly Logs 2026" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataset-desc">Deskripsi</label>
+                    <textarea id="dataset-desc" name="dataset_desc" rows="4"
+                              placeholder="Describe the contents of this dataset, data collection methods, format, etc..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="dataset-visibility">Visibility</label>
+                        <select id="dataset-visibility" name="dataset_visibility">
+                            <option value="public">Public (Anyone can view)</option>
+                            <option value="private">Private (Only you can access)</option>
+                        </select>
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="dataset-license">Lisensi</label>
+                        <input type="text" id="dataset-license" name="dataset_license"
+                               placeholder="e.g. MIT, CC-BY-4.0" value="CC-BY-4.0">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'home' %}" class="btn-secondary">Batal</a>
+                    <button type="submit" class="btn-primary">Next: Upload Dataset →</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- ══════════════════════════════════
+             STEP 2 – Upload Dataset
+        ══════════════════════════════════ -->
+        {% if show_step2 %}
+        <div id="step-2" class="animate-fade-in">
+            <h1 class="page-headline">Upload Dataset File</h1>
+            <p class="form-subtext">
+                Upload raw files (CSV, JSON, ZIP, etc.) for
+                <strong>{{ step1_data.title }}</strong>.
+                File bersifat opsional &mdash; bisa diunggah nanti.
+            </p>
+
+            <form class="custom-form" method="POST" action="{% url 'create_dataset' %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="wizard_step" value="2">
+
+                <input type="file" id="wizard-file-input" name="dataset_files"
+                       style="display:none;" multiple onclick="event.stopPropagation()">
+
+                <div class="upload-dropzone" id="wizard-dropzone"
+                     onclick="document.getElementById('wizard-file-input').click()">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <h3>Drag &amp; Drop files here</h3>
+                    <p>or click to browse from your computer</p>
+                    <span class="file-size-limit">Max size: 5 GB per file</span>
+                </div>
+
+                <!-- Selected file list -->
+                <ul class="file-list hidden" id="wizard-file-list"></ul>
+
+                <div class="form-group margin-top-20">
+                    <label for="upload-version">Version Tag</label>
+                    <input type="text" id="upload-version" name="upload_version"
+                           placeholder="e.g. v1.0.0" value="v1.0.0">
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'create_dataset' %}" class="btn-secondary">← Back</a>
+                    <button type="submit" class="btn-primary">Upload &amp; Publish</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+/* ── Stepper ── */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 36px;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+
+.step-item.active {
+    opacity: 1;
+}
+
+.step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, transform 0.3s;
+    flex-shrink: 0;
+}
+
+.step-item.active .step-circle {
+    background-color: var(--primary-color);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(148, 0, 255, 0.15);
+}
+
+.step-item.done .step-circle {
+    background-color: #27C27A;
+    transform: scale(1);
+    opacity: 1;
+}
+
+.step-item.done {
+    opacity: 1;
+}
+
+.step-label {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-dark);
+}
+
+.step-connector {
+    height: 2px;
+    width: 80px;
+    background-color: #ddd;
+    margin: 0 12px;
+    border-radius: 2px;
+    transition: background-color 0.4s;
+}
+
+.step-connector.done {
+    background-color: #27C27A;
+}
+
+/* ── File list ── */
+.file-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.file-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(148, 0, 255, 0.05);
+    border: 1px solid rgba(148, 0, 255, 0.12);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #333;
+}
+
+.file-list li svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--primary-color);
+    flex-shrink: 0;
+}
+</style>
+
+{% if show_step2 %}
+<script>
+/* ── Drag & Drop + file picker (Step 2 only) ── */
+const dropzone  = document.getElementById('wizard-dropzone');
+const fileInput = document.getElementById('wizard-file-input');
+const fileList  = document.getElementById('wizard-file-list');
+
+let selectedFiles = [];
+
+function updateFileInput() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    fileInput.files = dt.files;
+}
+
+function renderFiles() {
+    fileList.innerHTML = '';
+    if (selectedFiles.length === 0) {
+        fileList.classList.add('hidden');
+        return;
+    }
+    fileList.classList.remove('hidden');
+    selectedFiles.forEach((f, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" class="file-icon">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span class="file-name" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;">${f.name}</span>
+            <span style="margin-left:auto;color:#888;font-size:12px">
+                ${(f.size / 1024 / 1024).toFixed(2)} MB
+            </span>
+            <button type="button" class="remove-file-btn" onclick="removeFile(${index})" title="Hapus File" style="background:none; border:none; cursor:pointer; color:#ef5350; margin-left:12px; display:flex; align-items:center; padding: 2px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px; stroke:#ef5350;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>`;
+        fileList.appendChild(li);
+    });
+}
+
+function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    updateFileInput();
+    renderFiles();
+}
+
+fileInput.addEventListener('change', () => {
+    selectedFiles = Array.from(fileInput.files);
+    renderFiles();
+});
+
+dropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropzone.style.borderColor = 'var(--primary-color)';
+    dropzone.style.backgroundColor = 'rgba(148, 0, 255, 0.04)';
+});
+
+dropzone.addEventListener('dragleave', () => {
+    dropzone.style.borderColor = '';
+    dropzone.style.backgroundColor = '';
+});
+
+dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.style.borderColor = '';
+    dropzone.style.backgroundColor = '';
+
+    selectedFiles = Array.from(e.dataTransfer.files);
+    updateFileInput();
+    renderFiles();
+});
+</script>
+{% endif %}
+{% endblock %}

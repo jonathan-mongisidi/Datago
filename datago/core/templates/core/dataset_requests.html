@@ -1,0 +1,311 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Permintaan Dataset - DATAGO{% endblock %}
+
+{% block content %}
+{% if show_login_warning %}
+<!-- ── Login Warning Modal ── -->
+<div class="lw-backdrop" id="lw-backdrop">
+    <div class="lw-modal animate-fade-in">
+        <!-- Icon -->
+        <div class="lw-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" class="lw-icon">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+        </div>
+
+        <h2 class="lw-title">Kamu Belum Login</h2>
+        <p class="lw-desc">
+            Untuk melihat dataset request, kamu harus login terlebih dahulu.
+            Silakan masuk ke akunmu atau daftar jika belum punya akun.
+        </p>
+
+        <div class="lw-actions">
+            <a href="{% url 'signin' %}" class="btn-primary lw-btn">Sign In</a>
+            <a href="{% url 'signup' %}" class="btn-secondary lw-btn">Daftar Akun</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Login Warning Modal ── */
+.lw-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 0, 30, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.lw-modal {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 48px 40px 40px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+        0 32px 80px rgba(148, 0, 255, 0.22),
+        0 8px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.lw-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #4B0082);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(148, 0, 255, 0.35);
+}
+
+.lw-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.lw-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.lw-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.lw-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.lw-btn {
+    flex: 1;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 48px;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 24px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.lw-actions .btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+.lw-actions .btn-primary:hover {
+    background: #6800D6;
+    transform: translateY(-2px);
+}
+
+.lw-actions .btn-secondary {
+    background: transparent;
+    color: var(--text-dark);
+    border: 1px solid #dee2e6;
+}
+.lw-actions .btn-secondary:hover {
+    background: #f8f9fa;
+    border-color: #ced4da;
+}
+</style>
+{% endif %}
+<div class="datasets-page" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+    <h1 style="font-size: 32px; color: #1a1a2e; margin-bottom: 8px;">Permintaan Dataset Dashboard</h1>
+    <p style="color: #666; margin-bottom: 30px; font-size: 16px;">Pusat permintaan dataset dari kelompok Intelligence Creation (IC). Kelola dan penuhi pesanan di sini.</p>
+
+    <!-- PENDING / IN PROGRESS REQUESTS -->
+    <h2 style="font-size: 24px; color: #1a1a2e; margin-bottom: 16px; margin-top: 32px; border-bottom: 2px solid #eee; padding-bottom: 8px;">Request Baru / Aktif</h2>
+    <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 40px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background-color: #f8f9fa; border-bottom: 1px solid #eee;">
+                <tr>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Title & Description</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Contact</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Urgensi</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Status</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444; text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in pending_requests %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 20px; max-width: 300px;">
+                        <div style="font-weight: 600; font-size: 16px; color: #222; margin-bottom: 4px;">{{ req.title }}</div>
+                        <div style="font-size: 14px; color: #666; line-height: 1.5;">{{ req.description }}</div>
+                        
+                        {% if req.min_rows or req.required_columns %}
+                        <div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #7B00FF;">
+                            <div style="font-size: 12px; font-weight: 600; color: #444; margin-bottom: 4px;">Kriteria Pencarian:</div>
+                            {% if req.min_rows %}
+                            <div style="font-size: 12px; color: #555;">- Minimal Baris: <strong>{{ req.min_rows }}</strong></div>
+                            {% endif %}
+                            {% if req.required_columns %}
+                            <div style="font-size: 12px; color: #555;">- Kolom Wajib: <strong>{{ req.required_columns }}</strong></div>
+                            {% endif %}
+                            
+                            <div style="margin-top: 8px;">
+                                <a href="{% url 'find_matching_datasets' req.id %}" style="display: inline-block; padding: 6px 12px; background: #7B00FF; color: white; text-decoration: none; font-size: 11px; border-radius: 6px; font-weight: 600;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    Cari Dataset Sesuai Kriteria
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div style="font-size: 12px; color: #aaa; margin-top: 8px;">Requested at: {{ req.created_at|date:"d M Y H:i" }}</div>
+                    </td>
+                    <td style="padding: 20px; font-size: 14px; color: #444;">
+                        {{ req.ic_contact_email }}
+                    </td>
+                    <td style="padding: 20px;">
+                        {% if req.urgency == 'HIGH' %}
+                            <span style="background: #feecec; color: #c0392b; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">High Priority</span>
+                        {% elif req.urgency == 'NORMAL' %}
+                            <span style="background: #e6f9ee; color: #1a7a3f; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">Normal</span>
+                        {% else %}
+                            <span style="background: #f1f3f5; color: #555; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">Low</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 20px;">
+                        {% if req.status == 'PENDING' %}
+                            <span style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;">Menunggu</span>
+                        {% elif req.status == 'IN_PROGRESS' %}
+                            <span style="background: #cce5ff; color: #004085; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;">Sedang Berjalan</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 20px; text-align: right;">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <form action="{% url 'update_dataset_request_status' req.id %}" method="post" enctype="multipart/form-data" style="display: flex; gap: 12px; align-items: flex-start; justify-content: flex-end;">
+                                {% csrf_token %}
+                                
+                                <select name="status" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: white; font-size: 13px; cursor: pointer; outline: none; margin-top: 2px;">
+                                    <option value="PENDING" {% if req.status == 'PENDING' %}selected{% endif %}>Menunggu</option>
+                                    <option value="IN_PROGRESS" {% if req.status == 'IN_PROGRESS' %}selected{% endif %}>Sedang Berjalan</option>
+                                    <option value="COMPLETED" {% if req.status == 'COMPLETED' %}selected{% endif %}>Selesai</option>
+                                    <option value="REJECTED" {% if req.status == 'REJECTED' %}selected{% endif %}>Ditolak</option>
+                                </select>
+
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <style>
+                                        .stacked-file-input::-webkit-file-upload-button { display: block; margin: 0 auto 4px auto; cursor: pointer; }
+                                        .stacked-file-input::file-selector-button { display: block; margin: 0 auto 4px auto; cursor: pointer; }
+                                    </style>
+                                    <input type="file" name="result_file" class="stacked-file-input" style="font-size: 11px; width: 150px; color: #666; margin-top: 4px; padding-left: 16px;">
+                                </div>
+                                <button type="submit" style="padding: 8px 16px; background-color: #7B00FF; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-top: 2px;">Save & Upload</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 40px; text-align: center; color: #888;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 16px; color: #ccc;">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <p style="font-size: 16px;">Tidak ada permintaan dataset yang aktif.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- COMPLETED / REJECTED REQUESTS -->
+    <h2 style="font-size: 24px; color: #1a1a2e; margin-bottom: 16px; border-bottom: 2px solid #eee; padding-bottom: 8px;">Riwayat Request Selesai</h2>
+    <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background-color: #f8f9fa; border-bottom: 1px solid #eee;">
+                <tr>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Title & Description</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Contact</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Urgensi</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444;">Status</th>
+                    <th style="padding: 16px 20px; font-weight: 600; color: #444; text-align: right;">Result File</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in completed_requests %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 20px; max-width: 300px;">
+                        <div style="font-weight: 600; font-size: 16px; color: #222; margin-bottom: 4px;">{{ req.title }}</div>
+                        <div style="font-size: 14px; color: #666; line-height: 1.5;">{{ req.description }}</div>
+                        <div style="font-size: 12px; color: #aaa; margin-top: 8px;">Requested at: {{ req.created_at|date:"d M Y H:i" }}</div>
+                    </td>
+                    <td style="padding: 20px; font-size: 14px; color: #444;">
+                        {{ req.ic_contact_email }}
+                    </td>
+                    <td style="padding: 20px;">
+                        {% if req.urgency == 'HIGH' %}
+                            <span style="background: #feecec; color: #c0392b; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">High Priority</span>
+                        {% elif req.urgency == 'NORMAL' %}
+                            <span style="background: #e6f9ee; color: #1a7a3f; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">Normal</span>
+                        {% else %}
+                            <span style="background: #f1f3f5; color: #555; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap;">Low</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 20px;">
+                        {% if req.status == 'COMPLETED' %}
+                            <span style="background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;">Selesai</span>
+                        {% else %}
+                            <span style="background: #f8d7da; color: #721c24; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;">Ditolak</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 20px; text-align: right;">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                            <form action="{% url 'update_dataset_request_status' req.id %}" method="post" style="display: inline-block;">
+                                {% csrf_token %}
+                                <select name="status" onchange="this.form.submit()" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; background: white; font-size: 12px; cursor: pointer; outline: none; margin-right: 8px;">
+                                    <option value="COMPLETED" {% if req.status == 'COMPLETED' %}selected{% endif %}>Selesai</option>
+                                    <option value="REJECTED" {% if req.status == 'REJECTED' %}selected{% endif %}>Ditolak</option>
+                                    <option value="IN_PROGRESS">Re-open (Sedang Berjalan)</option>
+                                </select>
+                            </form>
+
+                            {% if req.result_file %}
+                                <a href="{{ req.result_file.url }}" target="_blank" style="padding: 8px; background-color: #e6f9ee; color: #1a7a3f; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500;">Download File</a>
+                            {% else %}
+                                <span style="font-size: 12px; color: #999;">Tidak ada file</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 40px; text-align: center; color: #888;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 16px; color: #ccc;">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <p style="font-size: 16px;">Belum ada riwayat permintaan selesai.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

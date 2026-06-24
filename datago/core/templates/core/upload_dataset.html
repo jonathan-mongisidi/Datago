@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}DATAGO - Upload Dataset{% endblock %}
+
+{% block content %}
+<div class="page-container container-centered">
+    <div class="glass-card form-container">
+        <h1 class="page-headline">Upload Dataset File</h1>
+        <p class="form-subtext">Upload raw files (CSV, JSON, ZIP, etc.) directly to our storage node.</p>
+        
+        <form class="custom-form" onsubmit="event.preventDefault(); alert('File upload simulated successfully!');">
+            <div class="upload-dropzone" id="dropzone">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h3>Drag & Drop files here</h3>
+                <p>or click to browse from your computer</p>
+                <input type="file" id="file-input" style="display: none;" multiple>
+                <span class="file-size-limit">Max size: 5 GB per file</span>
+            </div>
+            
+            <div class="form-group margin-top-20">
+                <label for="upload-version">Version Tag</label>
+                <input type="text" id="upload-version" placeholder="e.g. v1.0.0" value="v1.0.0">
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'home' %}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary">Upload & Publish</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

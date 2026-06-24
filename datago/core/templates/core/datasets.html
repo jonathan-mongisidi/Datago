@@ -1,0 +1,119 @@
+{% extends 'core/base.html' %}
+
+{% block title %}DATAGO - Explore Datasets{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="header-row">
+        <div>
+            <h1 class="page-headline">Available Datasets</h1>
+            {% if search_query %}
+            <p class="search-result-info">
+                Hasil untuk <strong>"{{ search_query }}"</strong>
+                &mdash; {{ datasets|length }} dataset ditemukan.
+                <a href="{% url 'datasets' %}" class="clear-search">Hapus filter ✕</a>
+            </p>
+            {% endif %}
+        </div>
+        <a href="{% url 'create_dataset' %}" class="btn-primary">+ Create Dataset</a>
+    </div>
+
+    <!-- Filter Bar -->
+    <form class="filters-bar" method="GET" action="{% url 'datasets' %}">
+        <input type="text" id="dataset-filter" name="q"
+               value="{{ search_query }}"
+               placeholder="Cari dataset berdasarkan nama, deskripsi, atau owner..."
+               class="filter-input" autocomplete="off">
+        <button type="submit" class="btn-primary" style="white-space:nowrap; padding:12px 20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>Cari
+        </button>
+    </form>
+
+    <!-- Datasets Grid -->
+    <div class="datasets-grid">
+        {% for dataset in datasets %}
+        <a href="{% url 'dataset_detail' dataset.pk %}" class="dataset-card dataset-card-link">
+            <!-- Visibilitas Badge -->
+            <div class="dataset-badge {% if dataset.visibility == 'private' %}badge-private{% endif %}">
+                {% if dataset.visibility == 'private' %}🔒 Pribadi{% else %}✓ Publik{% endif %}
+            </div>
+
+            <h3 class="dataset-name">{{ dataset.title }}</h3>
+            <p class="dataset-meta">
+                Oleh <strong>{{ dataset.owner.first_name|default:dataset.owner.username }}</strong>
+                &bull; {{ dataset.files.count }} file
+                &bull; {{ dataset.created_at|date:"d M Y" }}
+            </p>
+
+            {% if dataset.description %}
+            <p class="dataset-desc-preview">{{ dataset.description|truncatechars:100 }}</p>
+            {% endif %}
+
+            <div class="dataset-footer">
+                <span class="ds-license-tag">{{ dataset.license|default:"No License" }}</span>
+                <span class="btn-card-action">Lihat Detail →</span>
+            </div>
+        </a>
+        {% empty %}
+        <div class="no-results-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"
+                 style="width:64px;height:64px;display:block;margin:0 auto 16px">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            {% if search_query %}
+            <p class="no-data">Tidak ada dataset yang cocok dengan "<strong>{{ search_query }}</strong>".</p>
+            <a href="{% url 'datasets' %}" class="clear-search" style="margin-top:8px;display:inline-block">
+                Tampilkan semua dataset
+            </a>
+            {% else %}
+            <p class="no-data">Belum ada dataset yang tersedia.</p>
+            <a href="{% url 'create_dataset' %}" class="btn-primary" style="margin-top:16px;display:inline-block">
+                Buat Dataset Pertama
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.dataset-card-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+.dataset-card-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(148,0,255,0.10);
+    border-color: rgba(148,0,255,0.2);
+}
+.badge-private {
+    background-color: #FFF3CD;
+    color: #856404;
+}
+.dataset-desc-preview {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex: 1;
+}
+.ds-license-tag {
+    background: rgba(148,0,255,0.07);
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+.search-result-info { font-size:14px; color:var(--text-muted); margin-top:4px; }
+.clear-search { color:var(--primary-color); font-weight:600; margin-left:6px; font-size:13px; }
+.clear-search:hover { text-decoration:underline; }
+.no-results-wrap { grid-column:1/-1; text-align:center; padding:60px 20px; }
+.no-data { font-size:16px; color:#999; }
+</style>
+{% endblock %}

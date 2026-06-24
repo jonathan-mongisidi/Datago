@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATAGO - Daftar</title>
+    <meta name="description" content="Create your DATAGO account and start your data journey today.">
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        /* ─── LEFT PANEL ─── */
+        .left-panel {
+            width: 55%;
+            background: #7B00FF;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle radial glow for depth */
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .brand-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-style: italic;
+            font-size: clamp(52px, 6vw, 80px);
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            line-height: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-tagline {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: clamp(14px, 1.4vw, 18px);
+            color: #ffffff;
+            margin-top: 16px;
+            letter-spacing: 0.5px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── RIGHT PANEL ─── */
+        .right-panel {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 60px;
+            background: #ffffff;
+            position: relative;
+        }
+
+        /* Back arrow */
+        .back-link {
+            position: absolute;
+            top: 32px;
+            left: 40px;
+            text-decoration: none;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            font-size: 36px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+            color: #7B00FF;
+        }
+
+        /* Form container */
+        .signup-box {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .signup-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(28px, 3vw, 40px);
+            color: #0f0f0f;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .signup-subtitle {
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        /* Error / success message */
+        .error-box {
+            background: #fff0f0;
+            border: 1px solid #ffcccc;
+            color: #cc0000;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            border: 1px solid #b2f5c8;
+            color: #15803d;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form fields */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 18px;
+            background: #e8e8ec;
+            border: 1.5px solid transparent;
+            border-radius: 50px;
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            color: #1a1a1a;
+            outline: none;
+            transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .form-group input:focus {
+            background: #f0eeff;
+            border-color: #7B00FF;
+            box-shadow: 0 0 0 3px rgba(123, 0, 255, 0.12);
+        }
+
+        /* Hide Edge/IE default password reveal icon */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        /* Daftar button */
+        .btn-signup {
+            width: 60%;
+            display: block;
+            margin: 28px auto 0;
+            padding: 14px;
+            background: #7B00FF;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 0.4px;
+            transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+        }
+
+        .btn-signup:hover {
+            background: #6200e0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(123, 0, 255, 0.35);
+        }
+
+        .btn-signup:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        /* Masuk prompt */
+        .signin-prompt {
+            text-align: center;
+            font-size: 13.5px;
+            color: #888;
+            margin-top: 32px;
+        }
+
+        .signin-prompt a {
+            color: #1a73e8;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .signin-prompt a:hover {
+            color: #7B00FF;
+            text-decoration: underline;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                overflow: auto;
+            }
+
+            .left-panel {
+                width: 100%;
+                padding: 60px 24px;
+            }
+
+            .right-panel {
+                width: 100%;
+                padding: 40px 24px 60px;
+            }
+
+            .btn-signup {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════ LEFT PANEL ═══════════ -->
+    <div class="left-panel">
+        <div class="brand-logo">DATAGO</div>
+        <div class="brand-tagline">Powering Your Data Journey</div>
+    </div>
+
+    <!-- ═══════════ RIGHT PANEL ═══════════ -->
+    <div class="right-panel">
+
+        <!-- Back arrow -->
+        <a href="{% url 'home' %}" class="back-link" title="Kembali ke Beranda">&#8592;</a>
+
+        <div class="signup-box">
+            <h1 class="signup-title">Daftar</h1>
+            <p class="signup-subtitle">Start your data journey with DATAGO</p>
+
+            <!-- Pesan error / sukses dari Django view -->
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="success-box">{{ success }}</div>
+            {% endif %}
+
+            <!-- Daftar Form (POST ke Django view) -->
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value="{{ form_data.name|default:'' }}"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ form_data.email|default:'' }}"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Kata Sandi</label>
+                    <div class="password-input-wrapper" style="position: relative;">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="new-password"
+                            required
+                            style="padding-right: 52px;"
+                        >
+                        <button type="button" class="toggle-password-btn" style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center; padding: 4px; transition: color 0.2s;" title="Tampilkan/Sembunyikan Kata Sandi">
+                            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-signup" id="btn-sign-up">Daftar</button>
+            </form>
+
+            <p class="signin-prompt">
+                Sudah punya akun? <a href="{% url 'signin' %}">Masuk here.</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.querySelector('.toggle-password-btn');
+        if (toggleBtn && passwordInput) {
+            const eyeIcon = toggleBtn.querySelector('.eye-icon');
+            const eyeIconOff = toggleBtn.querySelector('.eye-icon-off');
+            
+            toggleBtn.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.style.display = 'none';
+                    eyeIconOff.style.display = 'block';
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.style.display = 'block';
+                    eyeIconOff.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
