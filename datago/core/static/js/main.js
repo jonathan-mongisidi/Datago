@@ -248,9 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function doGlobalSearch() {
         const q = globalSearchInput.value.trim();
         if (q) {
-            window.location.href = '/datasets/?q=' + encodeURIComponent(q);
+            window.location.href = '/dataset/datasets/?q=' + encodeURIComponent(q);
         } else {
-            window.location.href = '/datasets/';
+            window.location.href = '/dataset/datasets/';
         }
     }
 
