@@ -169,3 +169,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+FORCE_SCRIPT_NAME = '/dataset/'
+STATIC_URL = '/dataset/static/'
+MEDIA_URL = '/dataset/media/'
