@@ -29,5 +29,4 @@ RUN chown -R django:django /app
 USER django
 
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-", "datago_project.wsgi:application"]
-
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-log", "-", "datago_project.wsgi:application"]

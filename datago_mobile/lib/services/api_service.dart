@@ -388,4 +388,29 @@ class ApiService {
       return {'success': false, 'message': 'Terjadi kesalahan jaringan.'};
     }
   }
+
+  Future<Map<String, dynamic>> fulfillDatasetRequest(int reqId, int fileId) async {
+    final token = await getAccessToken();
+    final headers = {'Content-Type': 'application/json'};
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/requests/$reqId/fulfill/'),
+        headers: headers,
+        body: jsonEncode({'file_id': fileId}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message']};
+      } else {
+        return {'success': false, 'message': data['error'] ?? 'Gagal mengirim ke IC'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Terjadi kesalahan jaringan.'};
+    }
+  }
 }

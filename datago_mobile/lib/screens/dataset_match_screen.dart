@@ -46,6 +46,30 @@ class _DatasetMatchScreenState extends State<DatasetMatchScreen> {
     }
   }
 
+  Future<void> _fulfillRequest(int fileId) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final result = await ApiService().fulfillDatasetRequest(widget.requestId, fileId);
+    
+    if (mounted) {
+      Navigator.of(context).pop(); // Tutup loading
+      if (result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Berhasil mengirim ke IC')),
+        );
+        Navigator.of(context).pop(true); // Kembali ke layar sebelumnya
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Terjadi kesalahan')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,8 +274,10 @@ class _DatasetMatchScreenState extends State<DatasetMatchScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               if (match['file_url'] != null)
                 OutlinedButton.icon(
@@ -276,24 +302,35 @@ class _DatasetMatchScreenState extends State<DatasetMatchScreen> {
                     }
                   },
                   icon: const Icon(Icons.download, size: 16),
-                  label: const Text('Unduh File'),
+                  label: const Text('Unduh'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF7B00FF),
                     side: const BorderSide(color: Color(0xFF7B00FF)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
-              const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
                   _navigateToDatasetDetail(match['dataset_id']);
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF7B00FF),
+                  side: const BorderSide(color: Color(0xFF7B00FF)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 0,
+                ),
+                child: const Text('Lihat Dataset'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _fulfillRequest(match['id']),
+                icon: const Icon(Icons.send, size: 16),
+                label: const Text('Kirim ke IC'),
+                style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B00FF),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
-                child: const Text('Lihat Dataset'),
               ),
             ],
           ),

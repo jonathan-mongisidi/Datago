@@ -17,7 +17,7 @@ services:
     image: nginx:alpine
     restart: always
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/app/staticfiles
@@ -33,4 +33,3 @@ volumes:
 networks:
   django_net:
     driver: bridge
-

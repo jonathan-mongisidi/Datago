@@ -21,7 +21,6 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     path('reset-password/', views.reset_password_view, name='reset_password'),
     path('requests/', views.dataset_requests_view, name='dataset_requests'),
-    path('api/requests/create/', views.create_dataset_request_api, name='create_dataset_request_api'),
     path('requests/<int:pk>/update-status/', views.update_dataset_request_status, name='update_dataset_request_status'),
     path('requests/<int:pk>/match/', views.find_matching_datasets, name='find_matching_datasets'),
     path('files/<int:pk>/clean/', views.clean_dataset_file, name='clean_dataset_file'),

@@ -770,30 +770,14 @@ def dataset_requests_view(request):
 @login_required
 def update_dataset_request_status(request, pk):
     """Mengubah status dari permintaan dataset dan mengunggah file jika ada."""
-    import requests
     if request.method == 'POST':
         req = get_object_or_404(DatasetRequest, pk=pk)
         new_status = request.POST.get('status')
         if new_status in dict(DatasetRequest.STATUS_CHOICES):
             req.status = new_status
             if 'result_file' in request.FILES:
-                uploaded_file = request.FILES['result_file']
-                req.result_file = uploaded_file
+                req.result_file = request.FILES['result_file']
                 req.status = 'COMPLETED' # Otomatis selesai jika file diunggah
-                
-                # Forward file to Intelligence Creation (IC) if it originated from IC
-                if req.ic_submission_id:
-                    try:
-                        # Reset file pointer so requests can read it
-                        uploaded_file.seek(0)
-                        files = {'source_file': (uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)}
-                        
-                        ic_url = f"http://72.61.215.222/creation/api/submissions/{req.ic_submission_id}/receive_from_datago/"
-                        res = requests.post(ic_url, files=files, timeout=15)
-                        if not res.ok:
-                            messages.warning(request, f"File berhasil diunggah di Datago, tapi gagal dikirim ke IC: {res.text}")
-                    except Exception as e:
-                        messages.warning(request, f"File berhasil diunggah, tapi gagal dikirim ke IC (Error: {str(e)})")
             req.save()
             messages.success(request, f"Permintaan '{req.title}' berhasil diperbarui.")
     return redirect('dataset_requests')
@@ -978,39 +962,3 @@ def find_matching_datasets(request, pk):
         'avatar_color': get_avatar_color(request),
     }
     return render(request, 'core/matching_datasets.html', context)
-
-
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-
-@csrf_exempt
-def create_dataset_request_api(request):
-    if request.method != 'POST':
-        return JsonResponse({'success': False}, status=405)
-    try:
-        data = json.loads(request.body)
-        title = data.get('title', 'Tanpa Judul')
-        description = data.get('description', '')
-        contact = data.get('contact', '')
-        min_rows = data.get('min_rows', '')
-        required_columns = data.get('required_columns', '')
-        ic_submission_id = data.get('submission_id', '')
-
-        # Pastikan ada submission id
-        if not ic_submission_id:
-            return JsonResponse({'success': False, 'error': 'Missing submission_id'}, status=400)
-
-        # Buat DatasetRequest
-        req = DatasetRequest.objects.create(
-            title=title,
-            description='[IC ID: ' + str(ic_submission_id) + '] ' + description,
-            contact_email=contact,
-            min_rows=int(min_rows) if min_rows else None,
-            required_columns=required_columns,
-            status='PENDING',
-            ic_submission_id=ic_submission_id
-        )
-        return JsonResponse({'success': True, 'id': req.id})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)

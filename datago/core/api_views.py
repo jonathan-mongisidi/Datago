@@ -293,6 +293,47 @@ class DatasetRequestViewSet(viewsets.ModelViewSet):
     serializer_class = DatasetRequestSerializer
     permission_classes = [permissions.AllowAny]
 
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def fulfill(self, request, pk=None):
+        req = self.get_object()
+        file_id = request.data.get('file_id')
+        
+        if not file_id:
+            return Response({"error": "file_id is required"}, status=400)
+            
+        from core.models import DatasetFile
+        try:
+            dfile = DatasetFile.objects.get(id=file_id)
+        except DatasetFile.DoesNotExist:
+            return Response({"error": "DatasetFile not found"}, status=404)
+            
+        req.fulfilled_file = dfile
+        req.status = 'COMPLETED'
+        req.save()
+        
+        webhook_response = None
+        if req.ic_webhook_url:
+            import requests
+            try:
+                payload = {
+                    "request_id": req.id,
+                    "status": "COMPLETED",
+                    "file_url": request.build_absolute_uri(dfile.file.url) if dfile.file else None,
+                    "dataset_title": dfile.dataset.title,
+                    "version_tag": dfile.version_tag
+                }
+                resp = requests.post(req.ic_webhook_url, json=payload, timeout=5)
+                webhook_response = {"status_code": resp.status_code, "body": resp.text[:100]}
+            except Exception as e:
+                webhook_response = {"error": str(e)}
+                
+        return Response({
+            "success": True, 
+            "message": "Dataset request fulfilled successfully.",
+            "webhook_response": webhook_response
+        })
+
     @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def match(self, request, pk=None):
         req = self.get_object()

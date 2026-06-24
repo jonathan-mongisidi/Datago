@@ -30,11 +30,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Amankan Cookies & Session di layer HTTPS
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-
-CSRF_TRUSTED_ORIGINS = ['http://72.61.215.222']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -171,7 +169,3 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-FORCE_SCRIPT_NAME = '/dataset/'
-STATIC_URL = '/dataset/static/'
-MEDIA_URL = '/dataset/media/'

@@ -49,7 +49,9 @@
                         <span style="background: #f1f3f5; color: #555; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">{{ dfile.version_tag }}</span>
                     </td>
                     <td style="padding: 20px; text-align: right;">
-                        <a href="{{ dfile.file.url }}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #e6f9ee; color: #1a7a3f; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500;">Download File</a>
+                        <a href="{{ dfile.file.url }}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #e6f9ee; color: #1a7a3f; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 4px;">Download File</a>
+                        <br>
+                        <button onclick="fulfillRequest({{ req.id }}, {{ dfile.id }})" style="display: inline-block; padding: 8px 16px; background-color: #7B00FF; color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer;">Kirim ke IC</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -68,4 +70,46 @@
         </table>
     </div>
 </div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function fulfillRequest(reqId, fileId) {
+    if (!confirm('Kirim dataset ini ke IC?')) return;
+    
+    fetch(`/api/requests/${reqId}/fulfill/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ file_id: fileId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Berhasil mengirim dataset ke IC!');
+            window.location.href = "{% url 'dataset_requests' %}";
+        } else {
+            alert(data.error || data.message || 'Gagal mengirim.');
+        }
+    })
+    .catch(err => {
+        alert('Terjadi kesalahan jaringan.');
+    });
+}
+</script>
 {% endblock %}
