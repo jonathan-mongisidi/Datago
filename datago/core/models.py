@@ -115,6 +115,7 @@ class DatasetRequest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     result_file = models.FileField(upload_to='request_results/', null=True, blank=True)
     ic_contact_email = models.EmailField()
+    ic_submission_id = models.IntegerField(null=True, blank=True, help_text="ID submission dari IC")
     min_rows = models.IntegerField(null=True, blank=True, help_text="Jumlah baris minimum (opsional)")
     required_columns = models.TextField(null=True, blank=True, help_text="Nama kolom yang harus ada, pisahkan dengan koma (opsional)")
     created_at = models.DateTimeField(auto_now_add=True)
