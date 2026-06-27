@@ -3,6 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
+    container_name: datago_web
     volumes:
       - static_volume:/app/staticfiles
       - ./media:/app/media
@@ -15,6 +16,7 @@ services:
 
   nginx:
     image: nginx:alpine
+    container_name: datago_nginx
     restart: always
     ports:
       - "80:80"
@@ -26,6 +28,7 @@ services:
       - web
     networks:
       - django_net
+      - global_gateway_net
 
 volumes:
   static_volume:
@@ -33,3 +36,5 @@ volumes:
 networks:
   django_net:
     driver: bridge
+  global_gateway_net:
+    external: true
